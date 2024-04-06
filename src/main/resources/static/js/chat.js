@@ -5,6 +5,8 @@ const chat_log = document.getElementById("chat-log");
 
 chat_form.addEventListener("submit", send_chat)
 
+console.log("ggg");
+
 function send_chat(event){
     if(chat_input.value != ""){
         const new_chat_wrapper = document.createElement("div");
