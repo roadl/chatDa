@@ -34,10 +34,16 @@ public class ChatgptApiController {
     private RestTemplate template;
 
     @GetMapping("/chat")
-    public String chat(@RequestParam(name = "prompt")String prompt){
-        ChatGPTRequest request = new ChatGPTRequest(model, prompt);
+    public ApiResponse<ChatgptApiResponseDTO.SendMessageResultDTO> chat(@RequestParam(name = "userPrompt")String userPrompt){
+        String systemPrompt = "말 끝마다 '끼얏호우'를 붙여서 대답해 줘.";
+        ChatGPTRequest request = new ChatGPTRequest(model, systemPrompt,userPrompt);
         ChatGPTResponse chatGPTResponse =  template.postForObject(apiURL, request, ChatGPTResponse.class);
-        return chatGPTResponse.getChoices().get(0).getMessage().getContent();
+        return ApiResponse.onSuccess(
+                SuccessStatus.MESSAGE_OK,
+                ChatgptApiResponseDTO.SendMessageResultDTO.builder()
+                        .message(chatGPTResponse.getChoices().get(0).getMessage().getContent())
+                        .build()
+        );
     }
 
     @PostMapping("/test")
