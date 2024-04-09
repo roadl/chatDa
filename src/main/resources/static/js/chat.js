@@ -5,10 +5,11 @@ const chat_log = document.getElementById("chat-log");
 
 chat_form.addEventListener("submit", send_chat)
 
-console.log("ggg");
-
 function send_chat(event){
-    if(chat_input.value != ""){
+    const user_message = chat_input.value;
+    if(user_message != ""){
+        console.log("send message");
+
         const new_chat_wrapper = document.createElement("div");
         new_chat_wrapper.classList.add("chat-wrapper");
 
@@ -17,7 +18,7 @@ function send_chat(event){
 
         const new_chat = document.createElement("div");
         new_chat.classList.add("chat-bubble");
-        new_chat.innerText = chat_input.value;
+        new_chat.innerText = user_message;
 
         new_chat_wrapper.appendChild(new_chat_box);
         new_chat_wrapper.appendChild(new_chat);
@@ -26,20 +27,29 @@ function send_chat(event){
         chat_log.scrollTop = chat_log.scrollHeight;
         chat_input.value = "";
         chat_btn.disabled = true;
+
+        //send request & get response
+        const http = new XMLHttpRequest();
+        const url = `http://43.202.126.252:8080/api/chat?userPrompt=${user_message}`;
+        http.open('GET', url);
+        http.send();
+        http.onload = () => {
+            if( http.status === 200 ) {
+                console.log(http.response);
+                const response = JSON.parse(http.response);
+                receive_chat(null, response.result.message);
+            } else {
+                console.error("Error", http.status, http.statusText);
+            }
+        };
     }
-    
 }
 
 //create dummy response
 const receive_btn = document.getElementById("response");
 receive_btn.addEventListener("click",receive_chat);
 
-const response = [  "안녕~", "잘가","잘자", "???", "좋습니다",
-                    "챗다가 무언가 대답한다~", "챗다는 가끔 이렇게 길게 대답한다", 
-                    "임시로 만들어진 대답", "챗다가 당신의 질문에 대해 곰곰히 생각하고있다...",
-                    "챗다가 당신의 대답에 매우 놀랐다!"] 
-
-function receive_chat(event){
+function receive_chat(event, response){
     chat_btn.disabled = false;
 
     const new_response_wrapper = document.createElement("div");
@@ -50,7 +60,7 @@ function receive_chat(event){
 
     const new_response = document.createElement("div");
     new_response.classList.add("chat-bubble");
-    new_response.innerText = response[Math.floor(Math.random() * response.length)];
+    new_response.innerText = response;
 
     new_response_wrapper.appendChild(new_response);
     new_response_wrapper.appendChild(new_response_box);
